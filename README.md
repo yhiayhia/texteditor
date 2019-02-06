@@ -1,4 +1,4 @@
-# Chost Text Editor
+Text Editor
 
 simple text editor programming with c++/Qt and need development
 ## License 
