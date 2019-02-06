@@ -21,6 +21,10 @@
 #include<QDialog>
 #include<QGridLayout>
 #include<QLabel>
+#include<QFontDialog>
+#include<QtPrintSupport/QPrinter>
+#include<QtPrintSupport/QPrintDialog>
+
 
 class SdiWindow : public QMainWindow
 {
@@ -43,11 +47,14 @@ public:
     QAction *openAction;
     QAction *saveAction;
     QAction *saveAsAction;
+    QAction *printAction;
     QAction *aboutAction;
     QAction *undoAction;
     QAction *redoAction;
+    QAction *setFontAction;
     QAction *zoomInAction;
     QAction *zoomOutAction;
+    QAction *toolBarAction;
     QAction *findAction;
 
     QToolBar *fileToolBar;
@@ -59,7 +66,10 @@ public:
     QDialog *dlg;
     QGridLayout *layout;
     QLabel *findLabel;
+    QLabel *rowsLabel;
     QPushButton *cancelButton;
+
+    QPrinter *printer;
 
 
 
@@ -68,6 +78,7 @@ public:
     QMenu *searchMenu;
     QMenu *menuHelp;
     QMenu *viewMenu;
+    QMenu *settingsMenu;
     QString curFile;
 private:
     void createActions();
@@ -85,10 +96,12 @@ public slots:
     void findDialog();
     void open();
     void openNew();
+    void print();
     bool saveFile(const QString &fileName);
     bool saveAs();
     bool save();
     void fileNew();
+    void setFont();
     void about();
 
 };
