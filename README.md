@@ -1,6 +1,5 @@
 # Chost Text Editor
 
-Chost Text Editor developed in my ubuntu 18.04 LTS    
-
+simple text editor need development
 ## License 
 GPLv3, read the LICENSE file
