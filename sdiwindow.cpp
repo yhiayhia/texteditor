@@ -5,9 +5,10 @@ SdiWindow::SdiWindow(QWidget *parent)
 {
 
     QRect availableGeometry =QApplication::desktop()->availableGeometry(this);
-    resize(availableGeometry.width(), availableGeometry.height());
-    docWidget = new QTextEdit( this );
-    setCentralWidget( docWidget );
+    resize(availableGeometry.width(), availableGeometry.height()); 
+    docWidget = new QTextEdit;
+    printer=new QPrinter;
+    setCentralWidget(docWidget);
     setAttribute(Qt::WA_DeleteOnClose);
     createActions();
     createMenus();
@@ -16,7 +17,8 @@ SdiWindow::SdiWindow(QWidget *parent)
     statusBar()->showMessage( "Done" );
     setCurrentFile(QString());
     isFirstTime=true;
-    //setWindowIcon(QIcon(":/gedit.png"));
+    setWindowIcon(QIcon::fromTheme("accessories-text-editor"));
+
 }
 
 void SdiWindow::createActions(){
@@ -35,6 +37,9 @@ saveAction->setStatusTip(tr("Save the active file"));
 saveAsAction=new QAction(QIcon::fromTheme("document-save-as"),tr("&Save &As"),this);
 saveAsAction->setShortcut(QKeySequence::SaveAs);
 saveAsAction->setStatusTip(tr("Save the acrive file under a different"));
+
+printAction=new QAction(QIcon::fromTheme("document-print"),tr("Print"),this);
+printAction->setShortcut(QKeySequence::Print);
 
 closeAction=new QAction(QIcon::fromTheme("window-close"),tr("&Close &Window"),this);
 closeAction->setShortcut(QKeySequence::Close);
@@ -72,6 +77,8 @@ selectAllAction=new QAction(QIcon::fromTheme("edit-select-all"),tr("&Select &All
 selectAllAction->setStatusTip(tr("Select all text "));
 selectAllAction->setShortcut(QKeySequence::SelectAll);
 
+
+
 findAction=new QAction(QIcon::fromTheme("edit-find"),tr("&Find"),this);
 findAction->setShortcut(QKeySequence::Find);
 findAction->setStatusTip(tr("Search for text"));
@@ -82,6 +89,13 @@ zoomInAction->setStatusTip(tr("Zoom In"));
 zoomOutAction=new QAction(QIcon::fromTheme("zoom-out"),tr("&Zoom &Out"),this);
 zoomOutAction->setShortcut(QKeySequence::ZoomOut);
 zoomOutAction->setStatusTip(tr("Zoom Out"));
+toolBarAction=new QAction(tr("&Tool &Bar"),this);
+toolBarAction->setStatusTip(tr("Show/Hide toolbar"));
+
+toolBarAction->setCheckable(true);
+toolBarAction->setChecked(true);
+
+setFontAction=new QAction(QIcon::fromTheme("preferences-desktop-font"),tr("&Font"),this);
 
 
 aboutAction=new QAction(QIcon::fromTheme("help-about"),tr("&About"),this);
@@ -102,6 +116,9 @@ fileMenu->addAction(saveAction);
 fileMenu->addAction(saveAsAction);
 fileMenu->addSeparator();
 fileMenu->addAction(closeAction);
+fileMenu->addSeparator();
+fileMenu->addAction(printAction);
+fileMenu->addSeparator();
 fileMenu->addAction( exitAction );
 
 editMenu=menuBar()->addMenu(tr("&Edit"));
@@ -118,8 +135,13 @@ searchMenu=menuBar()->addMenu(tr("&Search"));
 searchMenu->addAction(findAction);
 
 viewMenu=menuBar()->addMenu(tr("&View"));
+viewMenu->addAction(toolBarAction);
+viewMenu->addSeparator();
 viewMenu->addAction(zoomInAction);
 viewMenu->addAction(zoomOutAction);
+
+settingsMenu=menuBar()->addMenu(tr("&Settings"));
+settingsMenu->addAction(setFontAction);
 
 menuHelp=menuBar()->addMenu(tr("&Help"));
 menuHelp->addAction(aboutAction);
@@ -155,6 +177,7 @@ void SdiWindow::createConnections(){
     connect(saveAction,SIGNAL(triggered(bool)),this,SLOT(save()));
     connect(saveAsAction,SIGNAL(triggered(bool)),this,SLOT(saveAs()));
     connect(closeAction,SIGNAL(triggered(bool)),this,SLOT(close()));
+    connect(printAction,SIGNAL(triggered(bool)),this,SLOT(print()));
     connect(exitAction,SIGNAL(triggered(bool)),qApp,SLOT(quit()));
 
     connect(aboutAction,SIGNAL(triggered(bool)),this,SLOT(about()));
@@ -162,6 +185,9 @@ void SdiWindow::createConnections(){
 
     connect(zoomInAction,SIGNAL(triggered(bool)),docWidget,SLOT(zoomIn()));
     connect(zoomOutAction,SIGNAL(triggered(bool)),docWidget,SLOT(zoomOut()));
+    connect(toolBarAction,SIGNAL(triggered(bool)),fileToolBar,SLOT(setVisible(bool)));
+    connect(toolBarAction,SIGNAL(triggered(bool)),editToolBar,SLOT(setVisible(bool)));
+    connect(toolBarAction,SIGNAL(triggered(bool)),searchToolBar,SLOT(setVisible(bool)));
 
     connect( docWidget->document(), SIGNAL(modificationChanged(bool)),this, SLOT(setWindowModified(bool)) );
     connect(docWidget,SIGNAL(redoAvailable(bool)),redoAction,SLOT(setEnabled(bool)));
@@ -177,11 +203,23 @@ void SdiWindow::createConnections(){
     connect( pasteAction, SIGNAL(triggered()), docWidget, SLOT(paste()) );
     connect(selectAllAction,SIGNAL(triggered(bool)),docWidget,SLOT(selectAll()));
 
+    connect(setFontAction,SIGNAL(triggered(bool)),this,SLOT(setFont()));
+
     connect(findAction,SIGNAL(triggered(bool)),this,SLOT(findDialog()));
     //connect(docWidget,SIGNAL(copyAvailable(bool)),findAction,SLOT(setEnabled(bool)));
 
 
 }
+
+void SdiWindow::print(){
+    QPrintDialog printDlg(printer,this);
+    if(printDlg.exec()==QDialog::Accepted){
+        docWidget->print(printer);
+    }
+
+}
+
+
 
 void SdiWindow::findDialog(){
     dlg=new QDialog(this);
@@ -301,7 +339,7 @@ void SdiWindow::loadFile(const QString &fileName){
 }
 
 void SdiWindow::open(){
-        QString fileName = QFileDialog::getOpenFileName(this);
+        QString fileName = QFileDialog::getOpenFileName(this,tr("Open"));
         loadFile(fileName);
 
 }
@@ -349,6 +387,9 @@ void SdiWindow::setCurrentFile(const QString &fileName){
 }
 
 
+void SdiWindow::setFont(){
+    docWidget->setFont(QFontDialog::getFont(0,this));
+}
 
 void SdiWindow::about(){
     QMessageBox::about(this,tr("About"),
