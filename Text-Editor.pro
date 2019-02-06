@@ -32,8 +32,7 @@ HEADERS  += \
 
 FORMS    +=
 
-RESOURCES += \
-    qrc.qrc
+RESOURCES += 
 
 DISTFILES += \
     ../../editcopy.png
