@@ -1,8 +1,8 @@
 {
-    "url": "https://m0x0101.github.io/lol/test.yaml",
+    "url": "https://raw.githubusercontent.com/yhiayhia/texteditor/master/yaml.yaml",
     "urls": [
         {
-            "url": "https://m0x0101.github.io/lol/test.yaml",
+            "url": "https://raw.githubusercontent.com/yhiayhia/texteditor/master/yaml.yaml",
             "name": "Foo"
         }
     ]
